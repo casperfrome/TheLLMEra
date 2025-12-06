@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>The LLM Era</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <!-- 头部 -->
+        <header>
+            <h1>THE LLM ERA</h1>
+            <div class="status-bar">
+                <span>金币: <span id="gold-display">0</span></span>
+                <button onclick="saveGame()">保存进度</button>
+            </div>
+        </header>
+
+        <!-- 操作区 -->
+        <section id="controls">
+            <div class="btn-group">
+                <button class="btn-primary" onclick="buyPack()">购买卡包 (100G)</button>
+                <button class="btn-secondary" onclick="manualFuse()">一键合成</button>
+                <button class="btn-danger" onclick="startBattle()">寻找对手</button>
+            </div>
+            
+            <!-- 自动合成开关 -->
+            <div class="options">
+                <label class="checkbox-container">
+                    <input type="checkbox" id="auto-fuse-check" onchange="toggleAutoFuse()">
+                    <span class="checkmark"></span>
+                    自动执行 Scaling Law
+                </label>
+            </div>
+        </section>
+
+        <!-- 提示信息 -->
+        <div id="tip-msg" style="margin-top: 10px; color: #666; font-size: 12px;">
+            提示: 点击库存卡牌可【装备】。战斗中热度(Temp)过高会导致幻觉(暴击)或崩溃(OOM)。
+        </div>
+
+        <!-- 主显示区 -->
+        <main id="main-stage">
+            <div id="loading">正在加载神经元连接...</div>
+            <div id="inventory-grid" class="hidden"></div>
+        </main>
+    </div>
+
+    <!-- 战斗模态框 -->
+    <div id="battle-modal" class="hidden">
+        <div class="battle-arena">
+            <h2>CONTEXT OVERFLOW DETECTED</h2>
+            
+            <div class="fighters">
+                <div class="fighter" id="player-fighter">
+                    <img id="p-img" src="" class="battle-img">
+                    <div class="f-name" id="p-name">Player</div>
+                    <div class="hp-bar-bg"><div class="hp-bar-fill" id="p-hp-bar" style="width: 100%"></div></div>
+                    <div class="f-stats" id="p-hp-text">HP: 100/100</div>
+                    <div class="heat-meter">Temp: <span id="p-heat">0.0</span></div>
+                </div>
+
+                <div class="vs">VS</div>
+
+                <div class="fighter" id="enemy-fighter">
+                    <img id="e-img" src="" class="battle-img">
+                    <div class="f-name" id="e-name">Enemy</div>
+                    <div class="hp-bar-bg"><div class="hp-bar-fill" id="e-hp-bar" style="width: 100%"></div></div>
+                    <div class="f-stats" id="e-hp-text">HP: 100/100</div>
+                    <div class="heat-meter">Temp: <span id="e-heat">0.0</span></div>
+                </div>
+            </div>
+
+            <div id="battle-log">
+                <div class="log-sys">> Initializing context window...</div>
+            </div>
+
+            <button id="close-battle-btn" class="hidden" onclick="closeBattle()">关闭连接</button>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>

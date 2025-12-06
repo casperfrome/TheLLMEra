@@ -1,0 +1,182 @@
+/* --- 核心修复：布局防抖动 --- */
+html {
+    /* 强制垂直滚动条轨道始终存在，无论内容是否超出一屏 */
+    overflow-y: scroll;
+    /* 稳定滚动条槽，避免出现/消失时布局抖动 */
+    scrollbar-gutter: stable;
+    /* 强制隐藏水平滚动条，防止飘字动画撑开页面 */
+    overflow-x: hidden;
+    width: 100%;
+}
+
+body {
+    background-color: #121212;
+    color: #00ff41;
+    font-family: 'Courier New', Courier, monospace;
+    margin: 0;
+    padding: 20px;
+    
+    /* Flex 居中布局 */
+    display: flex;
+    justify-content: center;
+    
+    /* 确保 body 自身不会引起溢出 */
+    width: 100%;
+    min-height: 100vh;
+    overflow-x: hidden;
+    box-sizing: border-box;
+}
+
+/* --- 游戏容器 --- */
+#game-container {
+    width: 900px;
+    /* 关键：设置最小高度，防止清空列表瞬间页面高度塌陷导致闪烁 */
+    min-height: 85vh; 
+    height: fit-content;
+    border: 2px solid #333;
+    padding: 20px;
+    background-color: #1e1e1e;
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.1);
+    position: relative;
+}
+
+/* --- 头部与按钮 --- */
+header {
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 20px;
+}
+
+#controls {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
+}
+
+button {
+    background: #333; color: #fff; border: 1px solid #555;
+    padding: 8px 16px; cursor: pointer; font-family: inherit;
+    transition: 0.2s; font-weight: bold; margin-right: 5px;
+}
+button:hover { background: #555; }
+button:active { transform: translateY(2px); }
+
+.btn-primary { border-color: #00ff41; color: #00ff41; }
+.btn-secondary { border-color: #fff; color: #fff; }
+.btn-danger { border-color: #ff4444; color: #ff4444; }
+
+/* --- 复选框样式 --- */
+.checkbox-container {
+    display: flex; align-items: center; cursor: pointer;
+    font-size: 14px; color: #888; user-select: none;
+}
+.checkbox-container input { display: none; }
+.checkmark {
+    height: 16px; width: 16px; background-color: #333; border: 1px solid #555;
+    margin-right: 8px; display: inline-block; position: relative;
+}
+.checkbox-container:hover .checkmark { background-color: #444; }
+.checkbox-container input:checked ~ .checkmark { background-color: #00ff41; border-color: #00ff41; }
+.checkbox-container input:checked ~ .checkmark:after {
+    content: ""; position: absolute; left: 5px; top: 1px; width: 4px; height: 9px;
+    border: solid #000; border-width: 0 2px 2px 0; transform: rotate(45deg);
+}
+.checkbox-container input:checked ~ span { color: #fff; }
+
+/* --- 飘字动画 (防止撑开宽度) --- */
+.float-text {
+    position: fixed;
+    color: #00ff41;
+    font-weight: bold;
+    font-size: 14px;
+    pointer-events: none; /* 关键：不阻挡鼠标事件 */
+    transform: translateX(-50%);
+    animation: floatUp 0.8s ease-out forwards;
+    z-index: 9999;
+    text-shadow: 1px 1px 0 #000;
+    white-space: nowrap; /* 关键：不换行 */
+}
+.float-text-gold {
+    position: fixed;
+    color: #ffd700 !important;
+    font-size: 16px !important;
+    animation: floatUpSlow 1.2s ease-out forwards !important;
+    z-index: 9999;
+    white-space: nowrap;
+}
+
+@keyframes floatUp {
+    0% { opacity: 1; margin-top: -10px; }
+    100% { opacity: 0; margin-top: -50px; }
+}
+@keyframes floatUpSlow {
+    0% { opacity: 1; margin-top: -20px; transform: scale(1) translateX(-50%); }
+    100% { opacity: 0; margin-top: -80px; transform: scale(1.2) translateX(-50%); }
+}
+
+/* --- 库存卡牌 --- */
+#inventory-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 15px; padding: 10px 0;
+    /* 给grid一个最小高度，防止空的时候高度为0 */
+    min-height: 100px; 
+}
+
+.card {
+    background: #2a2a2a; border: 2px solid #444; border-radius: 8px;
+    padding: 8px; display: flex; flex-direction: column; align-items: center;
+    cursor: pointer; position: relative; transition: all 0.2s;
+}
+.card:hover { transform: translateY(-5px); z-index: 10; }
+.card.equipped {
+    border-color: #00ff41; box-shadow: 0 0 15px rgba(0, 255, 65, 0.5);
+    background-color: #1a3a1a;
+}
+.card.equipped::after {
+    content: "[EQUIPPED]"; position: absolute; top: -10px;
+    background: #00ff41; color: #000; font-size: 10px;
+    padding: 2px 4px; border-radius: 4px;
+}
+.card-title { font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #fff; text-align: center; }
+.card-img { width: 80px; height: 80px; object-fit: contain; background: #000; border-radius: 4px; margin-bottom: 8px; border: 1px solid #333; }
+.card-stats { width: 100%; font-size: 10px; color: #aaa; }
+.stat-row { display: flex; justify-content: space-between; margin: 2px 0; }
+.stat-val { color: #00ff41; font-weight: bold; }
+
+/* 等级颜色 */
+.lvl-0 { border-color: #555; }
+.lvl-1 { border-color: #4facfe; } 
+.lvl-2 { border-color: #f093fb; } 
+.lvl-3 { border-color: #ff9a9e; }
+[class*="lvl-"]:not(.lvl-0):not(.lvl-1):not(.lvl-2):not(.lvl-3) {
+    border-color: #ffd700; animation: pulse 2s infinite;
+}
+@keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
+
+.hidden { display: none !important; }
+
+/* --- 战斗模态框 --- */
+#battle-modal {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.9); z-index: 100;
+    display: flex; justify-content: center; align-items: center;
+}
+.battle-arena {
+    width: 800px; background: #111; border: 2px solid #ff4444;
+    padding: 20px; box-shadow: 0 0 50px rgba(255, 68, 68, 0.2); text-align: center;
+}
+.battle-arena h2 { color: #ff4444; margin-top: 0; letter-spacing: 2px; }
+.fighters { display: flex; justify-content: space-around; align-items: center; margin: 20px 0; }
+.fighter { width: 200px; }
+.battle-img { width: 100px; height: 100px; border: 2px solid #fff; border-radius: 50%; background: #000; }
+.f-name { font-weight: bold; margin: 10px 0; font-size: 18px; color: #fff; }
+.hp-bar-bg { width: 100%; height: 10px; background: #333; border-radius: 5px; overflow: hidden; margin-bottom: 5px; }
+.hp-bar-fill { height: 100%; background: #00ff41; transition: width 0.3s; }
+.heat-meter { font-size: 12px; color: #ff9a9e; margin-top: 5px; }
+.vs { font-size: 40px; font-weight: bold; color: #555; font-style: italic; }
+#battle-log {
+    height: 150px; background: #000; border: 1px solid #333; padding: 10px;
+    overflow-y: auto; text-align: left; font-size: 12px; color: #aaa;
+    margin-bottom: 20px; font-family: monospace;
+}
+.log-entry { margin: 4px 0; border-bottom: 1px dashed #222; }
+.log-crit { color: #ff4444; font-weight: bold; }
+.log-sys { color: #ffff00; }
+#close-battle-btn { width: 100%; border-color: #fff; background: #000; }
